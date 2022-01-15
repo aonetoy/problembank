@@ -110,4 +110,13 @@ module.exports = {
     //OTHER
     removeProblemMyList: "delete from plass_mylist_problem where user_id = ? and problem_id = ? and problem_type = ?",
     deleleMyProblem : "delete from plass_mylist_problem where id = ?",
+
+    // category 확인
+    selectAddProblemCategory : "SELECT count(*) as cnt FROM plass_problem_category WHERE category_id in (SELECT id FROM plass_total_categories WHERE id=?)",
+    selectAddProblemParent : "SELECT count(*) as cnt FROM plass_problem_category WHERE category_id in (SELECT id FROM plass_total_categories WHERE parent_id = (SELECT parent_id FROM plass_total_categories WHERE id = ?))",
+    selectAddProblemName : "SELECT COUNT(*) as cnt FROM plass_problem_category WHERE category_id in (SELECT id FROM plass_total_categories WHERE name = (SELECT name FROM plass_total_categories WHERE id = ?))",
+    selectAddProblemTC : "SELECT COUNT(*) as cnt FROM plass_problems WHERE input = ? AND output=?",
+    selectAddProblemCnt : "SELECT COUNT(*) as cnt FROM plass_problems",
+    selectAddProblemSimName : "SELECT NAME as n FROM plass_problems WHERE id = ?",
+
 }

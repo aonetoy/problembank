@@ -279,6 +279,51 @@ router.post("/insertproblem", async function (req, res) {
         message: "입력 정보에 빈 칸이 존재합니다.",
       });
     }
+    // ---- name 비교
+    let sim_name = 0;
+    let dis_min=title.length;
+    const levenshtein = require('fast-levenshtein');
+    const [AddProblemCnt] = await db.query(sql.problems.selectAddProblemCnt);
+
+    for(let i=1;i<=Number(AddProblemCnt[0].cnt)-1;i++){
+        const [SimName] = await db.query(sql.problems.selectAddProblemSimName, [i]);
+        let distance = levenshtein.get(title, SimName[0].n);
+        if(distance < dis_min){
+            dis_min = distance;
+            sim_id=i;
+        }
+    }
+    sim_name = (title.length - dis_min) / title.length * 50;
+    console.log("sim_name : " + sim_name);
+
+    // ---- TC 비교
+    let sim_TC = 0;
+    const [tc] = await db.query(sql.problems.selectAddProblemTC, [input, output]);
+    if(Number(tc[0].cnt-1))
+        sim_TC=50;
+    console.log("sim_TC : " + sim_TC);
+    // ---- category 비교
+    let weight = 0;
+    const [cate] = await db.query(sql.problems.selectAddProblemCategory, [category]);
+    const [name] = await db.query(sql.problems.selectAddProblemName, [category]);
+    if(Number(cate[0].cnt-1))
+        weight = 1;
+    else if(Number(name[0].cnt) - Number(cate[0].cnt)){
+        weight = 0.75;
+    }
+    else{
+        const [pare] = await db.query(sql.problems.selectAddProblemParent, [category]);
+        if(Number(pare[0].cnt-1)){
+            if(category >= 41){
+                weight = 0.5;
+            }
+            else{
+                weight = 0.3;
+            }
+        }
+    }
+    console.log("weight : " + weight);
+    console.log("Sim : " + (sim_name+sim_TC)*weight + "%");
   } catch (error) {
     console.log(error);
   }
